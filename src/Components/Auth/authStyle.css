@@ -1,0 +1,30 @@
+#root:has(#main-auth-cont){
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+#main-auth-cont{
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+    min-width: 500px;
+    display: flex;
+    flex-direction: column;
+    background: white;
+}
+#auth-input-cont{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px;
+}
+
+
+#main-login-cont{
+
+}
+
+#main-register-cont{
+
+}
