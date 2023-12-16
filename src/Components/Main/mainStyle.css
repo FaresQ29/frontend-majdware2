@@ -1,0 +1,48 @@
+/* 
+font-family: 'Inter', sans-serif;
+font-family: 'Noto Sans JP', sans-serif; 
+*/
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+#main-container{
+
+}
+#toolbar{
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;
+
+}
+.toolbar-left, .toolbar-right{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+
+}
+
+.toolbar-left{
+
+}
+.toolbar-right{
+
+
+}
+.factory-menu-div{
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+   
+}
+#main-factory-title, #main-factory-title-no{
+    font-family: 'Inter', sans-serif;
+    font-size: 1.3rem;
+}
+#main-factory-title-no{
+    font-size: 1.2rem;
+    opacity: 0.6;
+}
+

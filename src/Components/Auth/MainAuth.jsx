@@ -14,7 +14,6 @@ import { useNavigate } from "react-router-dom";
 
 import axios from 'axios';
 
-
 export default function MainAuth(){
     const [tabValue, setTabValue] = useState('login');
     const [nameField, setNameField] = useState("");
@@ -25,16 +24,6 @@ export default function MainAuth(){
     const navigate = useNavigate()
     const [errMsg ,setErrMsg] = useState(null)
 
-    useEffect(()=>{
-        window.addEventListener("keypress", enterLogin)
-        function enterLogin(e){
-            console.log("Jkljds");
-           if(e.key==="Enter" && (nameField && passField)){
-            if(tabValue==="login"){handleLogin()}
-            else if(tabValue==="register"){handleRegister()}}
-        }
-        return ()=> window.removeEventListener("keypress", enterLogin)
-    }, [])
     async function handleRegister(e){
         e.preventDefault()
         try{
@@ -56,6 +45,7 @@ export default function MainAuth(){
     async function handleLogin(e){
         e.preventDefault()
         try{
+
             setLoading(true)
             const formData = {name: nameField, password: passField}
             const response = await axios.post(backendUrl + "/auth/login", formData)
@@ -67,7 +57,6 @@ export default function MainAuth(){
         }
         catch(err){
             setErrMsg(err.response.data.msg)
-            console.log(err);
             setLoading(false)
         }
 

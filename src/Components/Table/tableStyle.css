@@ -1,0 +1,124 @@
+#table-general-cont{
+    display: flex;
+    flex-direction: column;
+}
+.table-entry-warning{
+    text-align: center;
+    font-family: 'Inter', sans-serif;
+    font-size: 2rem;
+    padding: 10%;
+    color: rgb(87, 87, 87);
+    user-select: none;
+}
+.new-entry-div{
+    display: flex;
+    width: 90%;
+    padding: 20px 0px;
+    align-self: center;
+}
+.new-entry-table{
+    width: 100%;
+    border-spacing: 10px 0px;
+    margin-bottom: 1%;
+}
+
+.new-entry-table > tr{
+
+}
+
+.new-entry-table th{
+
+}
+
+.newEntryBtn{
+    width: 64px;
+    height: 56px;
+
+}
+
+/* ------------- */
+#main-table{
+    display: flex;
+    justify-content: center;
+
+}
+#main-table > table{
+    width: calc(90%);
+    table-layout: fixed;
+    border-collapse: collapse;
+    font-family: "Inter", serif;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;
+}
+
+#main-table > table thead{
+
+}
+#main-table > table thead th{
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-left: none;
+    border-top: none;
+    font-size: 1.2rem;
+    padding: 10px 0px;
+    color: rgb(55, 55, 55);
+    user-select: none;
+}
+#main-table > table thead th:last-child{
+    border-right: none;
+}
+/* table body */
+
+.table-entry-row, .table-entry-edit-row{
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  transition: all 0.1s linear;
+}
+
+
+.table-entry-row:last-child{
+    border-bottom: none;
+ 
+  }
+.table-entry-row:nth-child(even){
+    background-color: rgba(11, 0, 161, 0.02);
+}
+.table-entry-cell{
+    padding: 15px 0px;
+    text-align: center;
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.table-entry-row:hover{
+    background-color: rgb(236, 236, 238);
+
+}
+.edit-icon, .edit-icons-div svg{
+    opacity: 0.7;
+    transform: scale(1);
+}
+.edit-icons-div svg{
+    cursor: pointer;
+    transition: all 0.1s linear;
+}
+.edit-icons-div > button{
+    border: none;
+    background: none;
+}
+.edit-icons-div svg:hover{
+    transform: scale(1.2);
+}
+.edit-icon{
+    position: absolute;
+    left: -20%;
+    top: 35%;
+    opacity: 0.4;
+}
+.edit-icons-div{
+    position: absolute;
+    right: -15%;
+    top: 20%;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    
+}

@@ -1,0 +1,67 @@
+
+.empty-fac{
+    font-style: italic;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: rgb(112, 112, 112);
+    text-align: center;
+    user-select: none;
+
+}
+
+.menu-style-div{
+    display: flex;
+    flex-direction: column;
+    padding: 0px 20px;
+}
+.add-cancel-div{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+
+}
+.menu-add-fact{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 5px 10px;
+    gap: 5px;
+}
+.list-factories{
+    max-height: 367px;
+    overflow: auto;
+    background-color:#eceff183;
+    padding: 0;
+    border-radius: 5px;
+    width: 100%;
+    min-width: 282px;
+    margin-bottom: 10px;
+
+}
+.factory-menu-item{
+    border-bottom: 1px solid rgb(211, 211, 211);
+}
+.factory-menu-item > button{
+    padding: 12px;
+    background: none;
+    border: none;
+    font-size: 1rem;
+    color: rgb(78, 78, 78);
+    user-select: none;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+    text-align: start;
+    transition: all 0.1s linear;
+}
+.fact-hide{
+    display: none;
+}
+.factory-menu-item > button:hover{
+    background-color: #607d8b;
+    color: white;
+}
+.factory-menu-item:last-child{
+    border: none;
+}
