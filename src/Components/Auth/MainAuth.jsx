@@ -32,7 +32,8 @@ export default function MainAuth(){
             const response = await axios.post(backendUrl + "/auth/register", formData)
             storeToken(response.data.authToken);
             authenticateUser()
-            navigate("/main")
+            console.log(response.data);
+            navigate("/main/"+response.data.userId)
             setLoading(false)
             setErrMsg(null)
             console.log("Successfully registered");
@@ -51,7 +52,7 @@ export default function MainAuth(){
             const response = await axios.post(backendUrl + "/auth/login", formData)
             storeToken(response.data.authToken);
             authenticateUser()
-            navigate("/main")
+            navigate("/main/"+response.data.userId)
             setErrMsg(null)
             setLoading(false)
         }

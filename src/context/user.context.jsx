@@ -1,7 +1,7 @@
 import { createContext, useEffect, useState } from "react";
 import { backendUrl } from "../config";
 import axios from "axios";
-
+import { useParams } from "react-router-dom";
 
 export const UserContext = createContext()
 
@@ -10,8 +10,9 @@ export function UserProviderWrapper({children}){
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
     const [user, setUser] = useState(null)
-    const [factories, setFactories] = useState([]);
+    const [factories, setFactories] = useState(null)
     const [currentFactory, setCurrentFactory] = useState(null)
+
     useEffect(()=>{
         async function startup(){
             await authenticateUser()
@@ -22,30 +23,54 @@ export function UserProviderWrapper({children}){
 
     function storeToken(token){localStorage.setItem("authToken", token)}
 
-    async function addFactoryEntry(entry){
-        const factoryCopy = {...currentFactory};
-        factoryCopy.entries.push(entry)
-        const userCopy = {...user}
-        userCopy.factories = userCopy.factories.map(factory=>factory.factoryId===currentFactory.factoryId ? factoryCopy : factory)
+    async function getCurrentFact(factId){
+        const storedToken = localStorage.getItem("authToken");
         try{
-            await axios.put(backendUrl+"/factory/add/" + user._id, userCopy) 
-            setUser(userCopy)
-            setCurrentFactory(factoryCopy)
-            setFactories(userCopy.factories)
+            const response = await axios.get(backendUrl+"/factory/fact/"+factId,
+            { headers: { Authorization: `Bearer ${storedToken}`}}
+            )
+            setCurrentFactory(response.data)
+            return response.data;
         }
         catch(err){
             console.log(err);
         }
     }
-    async function editFactoryEntry(editEntry, entryId){
-        const userCopy = {...user};
-        const factoryCopy = {...currentFactory}
-        factoryCopy.entries = factoryCopy.entries.map(entry=>entry._id === entryId ? editEntry : entry)
-        userCopy.factories = userCopy.factories.map(factory=>factory.factoryId === factoryCopy.factoryId ? factoryCopy : factory)
+    async function getFactories(userId){
+        const storedToken = localStorage.getItem("authToken");
         try{
-            await axios.put(backendUrl+"/factory/add/" + user._id, userCopy) 
-            setUser(userCopy)
-            setFactories(userCopy.factories)
+            const response = await axios.get(backendUrl+"/factory/all", 
+            { headers: { Authorization: `Bearer ${storedToken}`, userid:userId}}
+            )
+            setFactories(response.data)
+            return response.data
+        }
+        catch(err){
+            console.log(err);
+        }
+    }
+    async function addFactoryEntry(entryForm){
+        const factCopy = {...currentFactory}
+        factCopy.entries.push(entryForm)
+        try{
+        
+            const response = await axios.put(backendUrl+"/factory/"+currentFactory._id, factCopy)
+            setCurrentFactory(response.data)
+        }
+        catch(err){
+            console.log(err);
+        }
+    }
+    async function editFactoryEntry(entryForm, entryId){
+        const factCopy = {...currentFactory}
+        factCopy.entries = factCopy.entries.map(entry=>{
+            return entry._id===entryId ? entryForm : entry;
+        })
+        
+        try{
+        
+            const response = await axios.put(backendUrl+"/factory/"+currentFactory._id, factCopy)
+            setCurrentFactory(response.data)
         }
         catch(err){
             console.log(err);
@@ -53,18 +78,22 @@ export function UserProviderWrapper({children}){
     }
 
 
-    async function addFactory(factoryName){
-        const userCopy = {...user}
-        userCopy.factories.push({factoryName, factoryId:crypto.randomUUID() ,entries: []})
-        await axios.put(backendUrl+"/factory/add/" + user._id, userCopy) 
-        setUser(userCopy)
+    async function addFactory(factObj){
+        try{
+            await axios.post(backendUrl+"/factory/all", factObj)
+            await getFactories(factObj.factoryUser)
+
+        }
+        catch(err){
+            console.log(err);
+        }
     }
 
-    function changeCurrentFact(factObj){setCurrentFactory(factObj)}
+    function changeCurrentFactory(factObj){
+        setCurrentFactory(factObj)
+    }
 
-
-
-
+    
     async function authenticateUser(){
         const storedToken = localStorage.getItem("authToken");
         if(!storedToken){
@@ -80,7 +109,7 @@ export function UserProviderWrapper({children}){
                 setIsLoggedIn(true)
                 setIsLoading(false)
                 setUser(response.data.user)
-                setFactories(response.data.user.factories)
+                await getFactories(response.data.user._id)
 
             }
             catch(err){
@@ -107,12 +136,13 @@ export function UserProviderWrapper({children}){
                 logoutUser,
                 storeToken,
                 authenticateUser,
-                factories,
-                addFactory,
-                changeCurrentFact,
+                changeCurrentFactory,
                 currentFactory,
+                addFactory,
+                factories,
                 addFactoryEntry,
-                editFactoryEntry
+                editFactoryEntry,
+                getCurrentFact
             }
         }>
             {children}

@@ -7,13 +7,11 @@ import FilterDate from '../FilterDate/FilterDate';
 import { Divider } from '@mui/material';
 import SavePDF from '../SavePDF/SavePDF';
 import { UserContext } from '../../context/user.context';
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import Table from '../Table/Table';
 export default function Main(){
     const {currentFactory} = useContext(UserContext)
-   useEffect(()=>{
-    console.log(currentFactory);
-   }, [currentFactory])
+
     return (
         <div id="main-container">
             <Nav />

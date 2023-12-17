@@ -2,11 +2,14 @@ import './factoryToolStyle.css';
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { TextField } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { UserContext } from '../../context/user.context';
 import {Alert} from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { backendUrl } from '../../config';
 
 export default function FactoryMenu(){
     const [anchorEl, setAnchorEl] = useState(null);
@@ -14,7 +17,8 @@ export default function FactoryMenu(){
     const [newFactVal, setNewFactVal] = useState("")
     const [alert, setAlert] = useState(null)
     const [searchVal, setSearchVal] = useState("")
-    const {factories, addFactory, currentFactory} = useContext(UserContext)
+
+    const {user, addFactory, factories} = useContext(UserContext)
     const open = Boolean(anchorEl);
     function handleSearch(e){
         setSearchVal(e.target.value);
@@ -22,29 +26,23 @@ export default function FactoryMenu(){
     }
 
     async function addFactoryFunc(){
-            if(!newFactVal){return}
-            const checkIfExists = factories.find(factory=>factory.factoryName===newFactVal)
-            if(checkIfExists) {
-                setAlert("Factory already exists")
-                return 
-            }
-            try{
-                await addFactory(newFactVal)
-                setAlert(null)
-                setShowAdd(false)
+        if(!newFactVal){return}
+        const factObj = {factoryName: newFactVal, factoryUser: user._id, entries:[]}
 
-            }
-            catch(err){
-                console.log(err);
-            }
+        await  addFactory(factObj)
+        setAlert(null)
+        setShowAdd(false)
+
         
-    }
+
+    
+}
+
     function closeMenu(){
         setAnchorEl(null);
         setShowAdd(false);
         setSearchVal("")
         setAlert(null)
-
     }
     return (
         <div className='factory-menu-div'>
@@ -61,7 +59,7 @@ export default function FactoryMenu(){
             <Menu id="basic-menu" anchorEl={anchorEl} open={open} onClose={closeMenu}>
                 <div className="menu-style-div">
                     <TextField id="factory-search" label="Search factories" variant="standard" sx={{marginBottom:"10px"}} value={searchVal} onChange={handleSearch}/>
-                    <ListFactories searchVal={searchVal} closeMenu={closeMenu}/>
+                    {factories  && <ListFactories searchVal={searchVal} closeMenu={closeMenu}/> }    
                     <div className="add-cancel-div" style={showAdd ? {background: "#0000000b"} : {background: "none"}}>
                         <Button color='inherit' onClick={()=>{setShowAdd(prev=>!prev); setNewFactVal(""); setAlert(null)}}> {!showAdd ? <AddIcon/> : "CANCEL"} </Button>
                         {showAdd && (
@@ -82,9 +80,12 @@ export default function FactoryMenu(){
 }
 
 function ListFactories({searchVal, closeMenu}){
-    const {factories, changeCurrentFact} = useContext(UserContext)
+    const {factories, changeCurrentFactory} = useContext(UserContext)
+    useEffect(()=>{
+
+    }, [])
     function handleFactBtn(factObj){
-        changeCurrentFact(factObj);
+        changeCurrentFactory(factObj)
         closeMenu()
     }
     return (

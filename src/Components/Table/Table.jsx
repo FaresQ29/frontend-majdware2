@@ -13,13 +13,22 @@ import CloseIcon from '@mui/icons-material/Close';
 
 import dayjs from 'dayjs';
 export default function Table(){
-    const {currentFactory} = useContext(UserContext)
+    const {getCurrentFact, currentFactory} = useContext(UserContext)
+    const [factory, setFactory] = useState(null)
+    useEffect(()=>{
+        refreshFactory()
+    },[])
+
+    async function refreshFactory(){
+        const response = await getCurrentFact(currentFactory._id)
+        setFactory(response)
+
+    }
     return (
         <div id="table-general-cont">
-
             <NewEntryAdd />
-            {(currentFactory && currentFactory.entries.length===0) && <div className="table-entry-warning">No data...</div> }        
-            {(currentFactory && currentFactory.entries.length>0) && (
+            {(factory && factory.entries.length===0) && <div className="table-entry-warning">No data...</div> }        
+            {(factory && factory.entries.length>0) && (
                 <div id="main-table">
                     <table>
                         <thead>
@@ -32,9 +41,9 @@ export default function Table(){
                             </tr>
                         </thead>
                         <tbody>
-                            {currentFactory.entries.map((entry, i)=>{
-                                return <TableEntry key={i} entry={entry}/>
-                            })}
+                                {factory.entries.map((entry, i)=>{
+                                    return <TableEntry key={i} entry={entry} refreshFactory={refreshFactory}/>
+                                })}
                         </tbody>
 
                     </table>
@@ -45,18 +54,22 @@ export default function Table(){
     )
 }
 
-function TableEntry({entry}){
+function TableEntry({entry, refreshFactory}){
     const [isEditMode, setIsEditMode]=useState(false)
     const defaultForm = {desig: entry.desig, data: entry.data, credito: entry.credito, debito: entry.debito}
     const [editForm, setEditForm] = useState(defaultForm)
     const {editFactoryEntry} = useContext(UserContext)
+
     useEffect(()=>{
-        isEditMode ? window.addEventListener("click", closeEdit) : window.removeEventListener("dblclick", closeEdit)
+        isEditMode ? window.addEventListener("click", closeEdit) : window.removeEventListener("click", closeEdit)
         function closeEdit(e){
-            if(!e.target.closest(`.row-${entry._id}`)){
+
+            if(!e.target.closest(`.row-${entry._id}`) && !e.target.closest(".MuiPickersPopper-root") ){
                 setIsEditMode(false)
-                setEditForm(defaultForm)
             }
+        }
+        return ()=>{
+            window.removeEventListener("click", closeEdit)
         }
     }, [isEditMode])
 
@@ -64,8 +77,9 @@ function TableEntry({entry}){
         if(!editForm.desig || !editForm.data || !editForm.credito || !editForm.debito) return
         try{
             await editFactoryEntry(editForm, entry._id)
-            // setIsEditMode(false)
-            // setEditForm(defaultForm)
+            await refreshFactory()
+            setIsEditMode(false)
+
         }
         catch(err){
             console.log("err");
@@ -101,7 +115,7 @@ function TableEntry({entry}){
             )}
             {isEditMode && (
                 <tr className={`table-entry-edit-row row-${entry._id}`}>
-                    {/* <td className='edit-icon'><EditIcon/></td> */}
+
                     <td className='table-entry-cell'>
                         <EditIcon className='edit-icon'/>
                         <DatePicker format="DD/MM/YYYY" onChange={handleDate} defaultValue={null} value={dayjs(editForm.data)} />
@@ -134,26 +148,18 @@ function NewEntryAdd(){
         })
     }
     function handleDates(e){
-        setForm(prev=>{
-            return {...prev, data: e.$d}
-        })
+        setForm(prev=>{return {...prev, data: e.$d}})
     }
     function handleDesig(e){
-        setForm(prev=>{
-            return {...prev, desig: e.target.value}
-        })
+        setForm(prev=>{return {...prev, desig: e.target.value}})
     }
     async function handleNewEntryAdd(e){
-        if(!form.data || !form.desig || !form.credito || !form.debito){
-            return
-        }
+        if(!form.data || !form.desig || !form.credito || !form.debito){return}
         try{
             await addFactoryEntry(form)
             setForm({desig: "", data: null, credito: "0", debito: "0"})
         }
-        catch(err){
-            console.log(err);
-        }
+        catch(err){console.log(err)}
     }
     return (
         <div className='new-entry-div'>
