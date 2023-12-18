@@ -23,6 +23,8 @@ export function UserProviderWrapper({children}){
 
     function storeToken(token){localStorage.setItem("authToken", token)}
 
+
+
     async function getCurrentFact(factId){
         const storedToken = localStorage.getItem("authToken");
         try{
@@ -89,10 +91,7 @@ export function UserProviderWrapper({children}){
         }
     }
 
-    function changeCurrentFactory(factObj){
-        setCurrentFactory(factObj)
-    }
-
+ 
     
     async function authenticateUser(){
         const storedToken = localStorage.getItem("authToken");
@@ -124,6 +123,8 @@ export function UserProviderWrapper({children}){
     }
     function logoutUser(){
         localStorage.removeItem("authToken");
+        setFactories(null)
+        setCurrentFactory(null)
         authenticateUser()
     }
 
@@ -136,7 +137,6 @@ export function UserProviderWrapper({children}){
                 logoutUser,
                 storeToken,
                 authenticateUser,
-                changeCurrentFactory,
                 currentFactory,
                 addFactory,
                 factories,

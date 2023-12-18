@@ -18,6 +18,10 @@ export default function Table(){
     useEffect(()=>{
         refreshFactory()
     },[])
+    useEffect(()=>{
+        console.log("test");
+        setFactory(currentFactory)
+    }, [currentFactory])
 
     async function refreshFactory(){
         const response = await getCurrentFact(currentFactory._id)
@@ -26,7 +30,7 @@ export default function Table(){
     }
     return (
         <div id="table-general-cont">
-            <NewEntryAdd />
+            <NewEntryAdd  refreshFactory={refreshFactory}/>
             {(factory && factory.entries.length===0) && <div className="table-entry-warning">No data...</div> }        
             {(factory && factory.entries.length>0) && (
                 <div id="main-table">
@@ -56,16 +60,17 @@ export default function Table(){
 
 function TableEntry({entry, refreshFactory}){
     const [isEditMode, setIsEditMode]=useState(false)
-    const defaultForm = {desig: entry.desig, data: entry.data, credito: entry.credito, debito: entry.debito}
-    const [editForm, setEditForm] = useState(defaultForm)
+    const [editForm, setEditForm] = useState( {desig: entry.desig, data: entry.data, credito: entry.credito, debito: entry.debito})
+    
     const {editFactoryEntry} = useContext(UserContext)
 
     useEffect(()=>{
+        setEditForm( {desig: entry.desig, data: entry.data, credito: entry.credito, debito: entry.debito})
         isEditMode ? window.addEventListener("click", closeEdit) : window.removeEventListener("click", closeEdit)
         function closeEdit(e){
-
             if(!e.target.closest(`.row-${entry._id}`) && !e.target.closest(".MuiPickersPopper-root") ){
                 setIsEditMode(false)
+
             }
         }
         return ()=>{
@@ -126,7 +131,7 @@ function TableEntry({entry, refreshFactory}){
                     <td className='table-entry-cell'>
                         <div className="edit-icons-div">
                             <button onClick={handleEdit}><SaveIcon/></button>
-                            <button onClick={()=>{setIsEditMode(false); setEditForm(defaultForm)}}><CloseIcon/></button>
+                            <button onClick={()=>{setIsEditMode(false)}}><CloseIcon/></button>
                         </div>
                     </td>
                 </tr> 
@@ -137,7 +142,7 @@ function TableEntry({entry, refreshFactory}){
 }
 
 
-function NewEntryAdd(){
+function NewEntryAdd({refreshFactory}){
     const [form, setForm] = useState({desig: "", data: null, credito: "0", debito: "0"})
     const {addFactoryEntry} = useContext(UserContext)
     function handleNumInput(e){
@@ -158,6 +163,7 @@ function NewEntryAdd(){
         try{
             await addFactoryEntry(form)
             setForm({desig: "", data: null, credito: "0", debito: "0"})
+            refreshFactory()
         }
         catch(err){console.log(err)}
     }

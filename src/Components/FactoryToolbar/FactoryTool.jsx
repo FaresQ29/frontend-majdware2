@@ -17,8 +17,8 @@ export default function FactoryMenu(){
     const [newFactVal, setNewFactVal] = useState("")
     const [alert, setAlert] = useState(null)
     const [searchVal, setSearchVal] = useState("")
+    const {user, addFactory, factories, getFactories} = useContext(UserContext)
 
-    const {user, addFactory, factories} = useContext(UserContext)
     const open = Boolean(anchorEl);
     function handleSearch(e){
         setSearchVal(e.target.value);
@@ -32,11 +32,9 @@ export default function FactoryMenu(){
         await  addFactory(factObj)
         setAlert(null)
         setShowAdd(false)
-
-        
-
-    
 }
+
+
 
     function closeMenu(){
         setAnchorEl(null);
@@ -80,12 +78,10 @@ export default function FactoryMenu(){
 }
 
 function ListFactories({searchVal, closeMenu}){
-    const {factories, changeCurrentFactory} = useContext(UserContext)
-    useEffect(()=>{
+    const {factories, getCurrentFact} = useContext(UserContext)
 
-    }, [])
     function handleFactBtn(factObj){
-        changeCurrentFactory(factObj)
+        getCurrentFact(factObj._id)
         closeMenu()
     }
     return (
