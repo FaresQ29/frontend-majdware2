@@ -10,6 +10,7 @@ nav{
     display: grid;
     padding: 0 5%;
     grid-template-columns: 1fr 70px;
+    z-index: 200;
 }
 
 #logout-btn{

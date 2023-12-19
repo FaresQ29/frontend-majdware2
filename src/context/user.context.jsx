@@ -90,9 +90,7 @@ export function UserProviderWrapper({children}){
         factCopy.entries = factCopy.entries.map(entry=>{
             return entry._id===entryId ? entryForm : entry;
         })
-        
         try{
-        
             const response = await axios.put(backendUrl+"/factory/"+currentFactory._id, factCopy)
             setCurrentFactory(response.data)
         }
@@ -101,7 +99,18 @@ export function UserProviderWrapper({children}){
         }
     }
 
-
+    async function deleteFactoryEntry(entryId){
+        const factCopy = {...currentFactory}
+        factCopy.entries = factCopy.entries.filter(entry=>entry._id!==entryId)
+        
+        try{
+            const response = await axios.put(backendUrl+"/factory/"+currentFactory._id, factCopy)
+            setCurrentFactory(response.data)
+        }
+        catch(err){
+            console.log(err);
+        }
+    }
     async function addFactory(factObj){
         try{
             await axios.post(backendUrl+"/factory/all", factObj)
@@ -165,6 +174,7 @@ export function UserProviderWrapper({children}){
                 addFactoryEntry,
                 editFactoryEntry,
                 getCurrentFact,
+                deleteFactoryEntry,
                 addCode,
                 deleteCode
             }

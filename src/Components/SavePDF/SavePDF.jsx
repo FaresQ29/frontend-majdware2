@@ -4,9 +4,8 @@ import autoTable from 'jspdf-autotable'
 import { createElement, useState } from "react"
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
+
 import logoPdf from '../../assets/logoPDF.png'
-import logoExcel from '../../assets/logoExcel.png'
 import { formattedStrToNum } from "../../utils";
 import numeral from "numeral";
 
@@ -30,7 +29,7 @@ export default function DialogComp({dialog, setDialog, displayTable}){
                 <TextField label="Filename" name="fileName" value={form.fileName} onChange={handleChange}/>
                 <div className="btn-div-export">
                     <button onClick={()=>generatePDF(displayTable, form)}><img src={logoPdf} alt="" />Export PDF</button>
-                    <button><img src={logoExcel} alt="" />Export Excel</button>
+
                 </div>
             </Box>
 

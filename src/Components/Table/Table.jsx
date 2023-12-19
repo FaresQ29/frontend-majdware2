@@ -2,7 +2,7 @@ import './tableStyle.css';
 import { UserContext } from '../../context/user.context';
 import { useContext, useEffect, useRef, useState } from 'react';
 import AddIcon from '@mui/icons-material/Add';
-import { Button } from '@mui/material';
+import { Button, Box } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers';
 import {TextField }from '@mui/material';
 import numeral from 'numeral'
@@ -22,6 +22,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import FilterDate from "../FilterDate/FilterDate.jsx"
 import DateRangeIcon from '@mui/icons-material/DateRange';
 import MakeDraggable from '../MakeDraggable.jsx';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
 
 export default function Table({setDisplayTable}){
     const {getCurrentFact, currentFactory} = useContext(UserContext)
@@ -167,7 +169,7 @@ export default function Table({setDisplayTable}){
                                 <th>Saldo € </th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody className='main-table-body'>
                                 {factory.entries.map((entry, i)=><TableEntry key={i} entry={entry} refreshFactory={refreshFactory}/>)}
                         </tbody>
 
@@ -239,14 +241,14 @@ function DesigMenuElement({elem, setFilter, filter}){
 function TableEntry({entry, refreshFactory}){
     const [isEditMode, setIsEditMode]=useState(false)
     const [editForm, setEditForm] = useState( {desig: entry.desig, data: entry.data, credito: entry.credito, debito: entry.debito})
-    
-    const {editFactoryEntry} = useContext(UserContext)
+    const [delDialog, setDelDialog] = useState(false)
+    const {editFactoryEntry, deleteFactoryEntry} = useContext(UserContext)
     const isVis = entry.visible === false ? "none" : ""
     useEffect(()=>{
         setEditForm( {desig: entry.desig, data: entry.data, credito: entry.credito, debito: entry.debito})
         isEditMode ? window.addEventListener("click", closeEdit) : window.removeEventListener("click", closeEdit)
         function closeEdit(e){
-            if(!e.target.closest(`.row-${entry._id}`) && !e.target.closest(".MuiPickersPopper-root") ){
+            if(!e.target.closest(`.row-${entry._id}`) && !e.target.closest(".MuiPickersPopper-root")  && !e.target.closest(".MuiDialog-root")){
                 setIsEditMode(false)
 
             }
@@ -263,6 +265,17 @@ function TableEntry({entry, refreshFactory}){
             await refreshFactory()
             setIsEditMode(false)
 
+        }
+        catch(err){
+            console.log("err");
+        }
+    }
+    async function deleteEntry(){
+        try{
+            await deleteFactoryEntry(entry._id)
+            await refreshFactory()
+            setIsEditMode(false)
+            setDelDialog(false)
         }
         catch(err){
             console.log("err");
@@ -311,10 +324,38 @@ function TableEntry({entry, refreshFactory}){
                         <div className="edit-icons-div">
                             <button onClick={handleEdit}><SaveIcon/></button>
                             <button onClick={()=>{setIsEditMode(false)}}><CloseIcon/></button>
+                            <button onClick={()=>{setDelDialog(true)}}><DeleteIcon/></button>
                         </div>
                     </td>
                 </tr> 
             )}
+            <Dialog open={delDialog} onClose={()=>setDelDialog(false)}>
+                <Box className="delete-entry-dialog">
+                <p>Are you sure you want to delete the following entry?</p>
+                 <table id="delete-preview-table">
+                    <thead >
+                        <tr>
+                            <th>Data</th>
+                            <th>Designação</th>
+                            <th>Crédito</th>
+                            <th>Débito</th>
+                            <th>Saldo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{dateObjToDisp(new Date(entry.data))}</td>
+                            <td>{entry.desig}</td>
+                            <td>{entry.credito}</td>
+                            <td>{entry.debito}</td>
+                            <td>{entry.saldo}</td>
+                        </tr>
+                    </tbody>
+
+                 </table>
+                <button onClick={deleteEntry}>Delete File</button>
+                </Box>
+            </Dialog>
         </>
 
     )
