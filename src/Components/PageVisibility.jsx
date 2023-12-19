@@ -16,10 +16,10 @@ export function IsPrivate({children}){
 }
 
 export function IsAnon({children}){
-    const {isLoggedIn, isLoading} = useContext(UserContext);
+    const {isLoggedIn, isLoading, user} = useContext(UserContext);
     const navigate = useNavigate()
     if(isLoggedIn){
-        return navigate("/main")
+        return navigate("/main/" + user._id)
     }
     
     else{

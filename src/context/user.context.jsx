@@ -23,8 +23,30 @@ export function UserProviderWrapper({children}){
 
     function storeToken(token){localStorage.setItem("authToken", token)}
 
-
-
+    async function addCode(codeObj){
+        try{
+            const checkIfExists = user.codes.find(elem=>elem.code===codeObj.code)
+            if(checkIfExists) throw Error("Code already exists")
+            const userCopy = {...user}
+            userCopy.codes.push(codeObj)
+            const response = await axios.put(backendUrl+"/user/add/"+user._id, userCopy)
+            await authenticateUser()
+        }
+        catch(err){
+                console.log(err);
+        }
+    }
+    async function deleteCode(codeId){
+        try{
+            const userCopy = {...user}
+            userCopy.codes = userCopy.codes.filter(code=>code._id!==codeId)
+            const response = await axios.put(backendUrl+"/user/add/"+user._id, userCopy)
+            await authenticateUser()
+        }
+        catch(err){
+                console.log(err);
+        }
+    }
     async function getCurrentFact(factId){
         const storedToken = localStorage.getItem("authToken");
         try{
@@ -142,7 +164,9 @@ export function UserProviderWrapper({children}){
                 factories,
                 addFactoryEntry,
                 editFactoryEntry,
-                getCurrentFact
+                getCurrentFact,
+                addCode,
+                deleteCode
             }
         }>
             {children}

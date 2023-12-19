@@ -3,7 +3,6 @@ import Nav from '../Nav/Nav'
 import FactoryMenu from '../FactoryToolbar/FactoryTool'
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import FilterDate from '../FilterDate/FilterDate';
 import { Divider } from '@mui/material';
 import SavePDF from '../SavePDF/SavePDF';
 import { UserContext } from '../../context/user.context';
@@ -26,7 +25,7 @@ export default function Main(){
                     }
                     </div>
                     <div className="toolbar-right">
-                        <FilterDate />
+
                         <Divider orientation="vertical" flexItem />
                         <SavePDF/>
                     </div>

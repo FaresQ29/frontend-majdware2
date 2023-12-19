@@ -1,4 +1,9 @@
 #filter-date-toolbar{
+    background-color: white;
     display: flex;
     gap: 10px;
+    z-index: 1000;
+    padding: 20px;
+    border-radius: 3px;
+
 }

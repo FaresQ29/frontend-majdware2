@@ -36,6 +36,97 @@
 
 }
 
+.desig-settings-btn{
+    cursor: pointer;
+    border: none;
+    background: none;
+}
+/* desig menu */
+
+#desig-menu-cont{
+    position: absolute;
+    top: 57px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    width: 100%;
+}
+.desig-bg{
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+.desig-menu{
+    width: 100%;
+    max-height: 400px;
+    overflow: auto;
+    background-color: white;
+    z-index: 1002;
+    border-radius: 3px;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+}
+.desig-menu-add-btn{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: none;
+    padding: 5px 10px;
+    gap: 3px;
+    font-size: 1rem;
+    border: 1px solid black;
+    border-radius: 3px;
+    cursor: pointer;
+}
+.desig-menu-add-code{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 15px;
+    background-color: rgba(84, 92, 180, 0.05);
+}
+.desig-menu-add-code-btn{
+    padding: 5px 0px;
+    cursor: pointer;
+}
+
+.code-container{
+    display: flex;
+    flex-direction: column;
+    padding: 10px 3px;
+    margin-top: 5px;
+}
+.code-div{
+    display: grid;
+    grid-template-columns: 0.2fr 1fr 0.3fr;
+    padding: 5px 0px;
+    font-family: "Inter", serif;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+}
+.code-div:last-child{
+    border-bottom: none;
+}
+.code-div-code,.code-div-codeVal{
+    text-align: center;
+    border-right: 1px solid rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+}
+
+.code-div > button{
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: 0.2s linear transform;
+}
+.code-div > button:hover{
+    transform: scale(1.1);
+}
 /* ------------- */
 #main-table{
     display: flex;
@@ -52,7 +143,7 @@
 }
 
 #main-table > table thead{
-
+   
 }
 #main-table > table thead th{
     border: 1px solid rgba(0, 0, 0, 0.15);
@@ -61,6 +152,7 @@
     font-size: 1.2rem;
     padding: 10px 0px;
     color: rgb(55, 55, 55);
+ 
     user-select: none;
 }
 #main-table > table thead th:last-child{
@@ -121,4 +213,102 @@
     flex-direction: column;
     gap: 5px;
     
+}
+/* table head */
+.table-head-date{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+.table-head-date > div:first-child{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    width: 100%;
+}
+.table-head-date > button{
+    position: absolute;
+    border: none;
+    background: none;
+    cursor: pointer;
+    right: 3px;
+}
+.table-head-desig{
+    position: relative;
+    padding: 0px;
+
+}
+.table-desig-text{
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+}
+
+.table-head-date svg{
+    padding-top: 5px;
+}
+
+#table-desig-menu-cont{
+    position: absolute;
+    width: 100%;
+    z-index: 1000;
+    top: 100%;
+    
+}
+.table-desig-menu-bg{
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+
+}
+.table-desig-menu{
+    position: relative;
+    background-color: white;
+    width: 100%;
+    z-index: 1002 !important;
+    box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
+    display: flex;
+    flex-direction: column;
+}
+.no-desig-table{
+    padding: 30px 0px;
+
+}
+
+.table-desig-list-div{
+    display: grid;
+    grid-template-columns: 0.3fr 1fr 0.3fr;
+    padding: 15px 0px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.087);
+}
+.table-desig-list-div:last-child{
+    border: none;
+}
+.table-desig-list-div:hover{
+    background-color: rgba(0, 0, 0, 0.036);
+}
+.th-filter-num{
+    font-size: 0.8rem;
+    position: absolute;
+    right: 2%;
+    top: 32%;
+}
+
+.th-filter-num > button{
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    opacity: 0.8;
+    border-radius: 3px;
+    padding: 1px 3px;
+    background: none;
+    cursor: pointer;
+    background-color: white;
+}
+.th-filter-num > button:hover{
+    opacity: 1;
 }

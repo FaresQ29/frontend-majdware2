@@ -1,15 +1,11 @@
 import './factoryToolStyle.css';
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
 import { useContext, useEffect, useState } from 'react';
 import { TextField } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { UserContext } from '../../context/user.context';
 import {Alert} from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { backendUrl } from '../../config';
 
 export default function FactoryMenu(){
     const [anchorEl, setAnchorEl] = useState(null);
