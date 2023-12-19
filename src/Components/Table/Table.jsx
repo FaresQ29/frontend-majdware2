@@ -1,12 +1,12 @@
 import './tableStyle.css';
 import { UserContext } from '../../context/user.context';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import { Button } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers';
 import {TextField }from '@mui/material';
 import numeral from 'numeral'
-import { dateObjToDisp } from '../../utils';
+import { dateObjToDisp, formattedStrToNum } from '../../utils';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import CloseIcon from '@mui/icons-material/Close';
@@ -22,10 +22,12 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import FilterDate from "../FilterDate/FilterDate.jsx"
 import DateRangeIcon from '@mui/icons-material/DateRange';
 import MakeDraggable from '../MakeDraggable.jsx';
-export default function Table(){
+
+export default function Table({setDisplayTable}){
     const {getCurrentFact, currentFactory} = useContext(UserContext)
     const [showDateDiv, setShowDateDiv] = useState(false)
     const [factory, setFactory] = useState(null)
+    const [lastEntrySaldo, setLastEntrySaldo] = useState(0)
     const [showDesigMenu, setShowDesigMenu] = useState(false)
     const [filter, setFilter] = useState({
         date: "asc",
@@ -35,7 +37,9 @@ export default function Table(){
             to: null
         }
     })
-
+    useEffect(()=>{
+        setDisplayTable(factory)
+    }, [factory])
     useEffect(()=>{
         refreshFactory()
     },[])
@@ -61,13 +65,48 @@ export default function Table(){
             return copy
         })
     }
+    function calculateSaldo(fact){
+        const copyEntries = [...fact.entries]
+        copyEntries.sort((a, b)=>{
+            if(new Date(a.data)>new Date(b.data)){return 1}
+            else{return -1}
+        })
+        copyEntries.sort((a, b)=>{
+            if(new Date(a.data).getTime()===new Date(b.data).getTime()){
+                if(a.timestap>b.timestamp){return 1}
+                else{return -1}
+            }
+        })
+        copyEntries.map((entry, index)=>{
+            if(index===0){ entry.saldo = checkSaldoEntry(entry) }
+            else { entry.saldo = copyEntries[index-1].saldo + checkSaldoEntry(entry)}
+            if(index===copyEntries.length-1) setLastEntrySaldo(entry.saldo)
+        })
+
+        fact.entries = copyEntries
+    }
     function filterSettings(fact){
         const factCopy = {...fact}
-       factCopy.entries.sort((a, b)=>{
+        calculateSaldo(factCopy)
+        factCopy.entries.sort((a, b)=>{
             const aDate = new Date(a.data)
             const bDate = new Date(b.data)
-            if(filter.date==="asc"){ return aDate>bDate ? 1 : -1 }
-            else if(filter.date==="des"){ return aDate<bDate ? 1 : -1 }
+            if(filter.date==="asc"){ 
+                return aDate>bDate ? 1 : -1 
+            }
+            else if(filter.date==="des"){
+                return aDate<bDate ? 1 : -1 
+            }
+
+        })
+        factCopy.entries.sort((a,b)=>{
+            const aDate = new Date(a.data).getTime()
+            const bDate = new Date(b.data).getTime()
+            if(aDate===bDate){
+                if(filter.date==="asc"){ return a.timestamp > b.timestamp ? 1 : -1 }
+                else if(filter.date==="des"){return a.timestamp < b.timestamp ? 1 : -1 }
+            }
+      
         })
         if(filter.codes.length>0){
             factCopy.entries = factCopy.entries.map(entry=>{
@@ -88,9 +127,9 @@ export default function Table(){
                 return entry
             })
         }
-
         return factCopy
     }
+
     function handleDateClick(){
         setFilter(prev=>{
             const val = prev.date ==="asc" ? "des" : "asc";
@@ -98,13 +137,12 @@ export default function Table(){
         })
     }
     function clearFilter(e){
-        setFilter(prev=>{
-            return {...prev, codes: []}
-        })
+        setFilter(prev=>{return {...prev, codes: []}})
     }
     return (
         <div id="table-general-cont">
-            <NewEntryAdd  refreshFactory={refreshFactory}/>     
+            <NewEntryAdd  refreshFactory={refreshFactory} lastEntrySaldo={lastEntrySaldo}/>
+                
             {(factory) && (
                 <div id="main-table">
                     <table>
@@ -116,7 +154,7 @@ export default function Table(){
                                     </div>
                                     <button onClick={()=>setShowDateDiv(prev=>!prev)}><DateRangeIcon/></button>
                                     {showDateDiv && (
-                                        <MakeDraggable><FilterDate setShowDateDiv={setShowDateDiv} changeFilterDates={changeFilterDates}/></MakeDraggable>
+                                        <MakeDraggable><FilterDate setShowDateDiv={setShowDateDiv} changeFilterDates={changeFilterDates} /></MakeDraggable>
                                     )}
                                 </th>
                                 <th className='table-head-desig'>
@@ -126,7 +164,7 @@ export default function Table(){
                                 </th>
                                 <th>Crédito</th>
                                 <th>Débito</th>
-                                <th>Saldo</th>
+                                <th>Saldo € </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -140,7 +178,13 @@ export default function Table(){
 
     )
 }
-
+function checkSaldoEntry(entry){
+    const credito = formattedStrToNum(entry.credito)
+    const debito = formattedStrToNum(entry.debito)
+    if(credito!==0){return credito * -1 }
+    else if(debito!==0){ return debito}
+    if(credito===0 && debito===0) return 0
+}
 function DesigMenuTable({setShowDesigMenu, setFilter, filter}){
     const {user} = useContext(UserContext)
     return (
@@ -249,7 +293,7 @@ function TableEntry({entry, refreshFactory}){
                     <td className='table-entry-cell'>{entry.desig}</td>
                     <td className='table-entry-cell'>{entry.credito}</td>
                     <td className='table-entry-cell'>{entry.debito}</td>
-                    <td className='table-entry-cell'></td>
+                    <td className='table-entry-cell'>{numeral(entry.saldo).format('0,0')}</td>
                 </tr> 
             )}
             {isEditMode && (
@@ -263,6 +307,7 @@ function TableEntry({entry, refreshFactory}){
                     <td className='table-entry-cell'><TextField label="Crédito" value={editForm.credito} onChange={handleNumInput} name="credito"/></td>
                     <td className='table-entry-cell'><TextField label="Débito" value={editForm.debito} onChange={handleNumInput} name="debito"/></td>
                     <td className='table-entry-cell'>
+                    {numeral(entry.saldo).format('0,0')}
                         <div className="edit-icons-div">
                             <button onClick={handleEdit}><SaveIcon/></button>
                             <button onClick={()=>{setIsEditMode(false)}}><CloseIcon/></button>
@@ -276,10 +321,16 @@ function TableEntry({entry, refreshFactory}){
 }
 
 
-function NewEntryAdd({refreshFactory}){
-    const [form, setForm] = useState({desig: "", data: null, credito: "0", debito: "0"})
+function NewEntryAdd({refreshFactory, lastEntrySaldo}){
+
+    const [form, setForm] = useState({desig: "", data: null, credito: 0, debito: 0, saldo: lastEntrySaldo===null ?"":lastEntrySaldo})
     const {addFactoryEntry, user} = useContext(UserContext)
     const [showDesig, setShowDesig] = useState(false)
+    useEffect(()=>{
+        setForm(prev=>{
+            return {...prev, saldo: lastEntrySaldo + checkSaldoEntry(form)}
+        })
+    }, [lastEntrySaldo, form.credito, form.debito])
     function handleNumInput(e){
         const {name, value} = e.target;
         setForm(prev=>{
@@ -288,7 +339,7 @@ function NewEntryAdd({refreshFactory}){
         })
     }
     function handleDates(e){
-        setForm(prev=>{return {...prev, data: e.$d}})
+        setForm(prev=>{return {...prev, data: e}})
     }
     function handleDesig(e){
         const lastKey = e.target.value.split("").pop()
@@ -301,11 +352,13 @@ function NewEntryAdd({refreshFactory}){
         }
     }
     async function handleNewEntryAdd(e){
-        if(!form.data || !form.desig || !form.credito || !form.debito){return}
+        if(!form.data || !form.desig){return}
         try{
+            
             await addFactoryEntry(form)
             setForm({desig: "", data: null, credito: "0", debito: "0"})
             refreshFactory()
+            
         }
         catch(err){console.log(err)}
     }
@@ -324,7 +377,7 @@ function NewEntryAdd({refreshFactory}){
                 <tbody>
                 <tr>
                     <td>
-                        <DatePicker sx={newEntryStyle}  format="DD/MM/YYYY" onChange={handleDates} defaultValue={null} value={!form.data ? null : form.data}/>
+                        <DatePicker sx={newEntryStyle} format="DD/MM/YYYY" onChange={handleDates}  value={!form.data ? null : form.data}/>
                     </td>
                     <td>
                         <FormControl style={newEntryStyle} sx={{position:"relative"}} variant="outlined">
@@ -343,7 +396,7 @@ function NewEntryAdd({refreshFactory}){
                         <TextField label="Débito" style={newEntryStyle} onChange={handleNumInput} name="debito" value={form.debito}/>
                     </td>
                     <td>
-                        <TextField label="Saldo"  style={newEntryStyle} disabled/>
+                        <TextField label="Saldo"  style={newEntryStyle} value={numeral(form.saldo).format('0,0')} disabled/>
                     </td>
                 </tr>
                 </tbody>

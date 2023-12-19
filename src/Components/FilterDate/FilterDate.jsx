@@ -23,7 +23,7 @@ export default function FilterDate({setShowDateDiv, changeFilterDates}){
     }
     return (
         <div id="filter-date-toolbar">
-            <CloseIcon sx={iconStyle} onClick={()=>setShowDateDiv(false)}/>
+            <CloseIcon sx={iconStyle} onClick={()=>{setShowDateDiv(false); clearDates()}}/>
             <DatePicker label="From" value={from} format='DD/MM/YYYY' onChange={(newValue) => setFrom(newValue)} />
             <DatePicker label="To" value={to} format='DD/MM/YYYY' onChange={(newValue) => setTo(newValue)} />
             <button style={btnStyle} onClick={clearDates}>Clear</button>

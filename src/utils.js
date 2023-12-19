@@ -1,4 +1,5 @@
 export function formattedStrToNum(val){
+    if(typeof val==="number") return val
     return parseInt(val.replaceAll(",", ""))
 }
 export function dateObjToDisp(dateStrObj){

@@ -44,7 +44,8 @@ export default function MakeDraggable({children}){
                     zIndex: "1100",
                     display:"flex",
                     flexDirection:"column",
-                    boxShadow: "rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px",
+                    boxShadow: "rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px",
+             
                     borderRadius:"5px",
                 }}>
                 <div className="drag-element" 

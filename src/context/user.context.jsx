@@ -75,9 +75,9 @@ export function UserProviderWrapper({children}){
     }
     async function addFactoryEntry(entryForm){
         const factCopy = {...currentFactory}
+        entryForm.timestamp = Date.now()
         factCopy.entries.push(entryForm)
         try{
-        
             const response = await axios.put(backendUrl+"/factory/"+currentFactory._id, factCopy)
             setCurrentFactory(response.data)
         }
