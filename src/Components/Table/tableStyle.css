@@ -51,7 +51,14 @@
 .new-entry-table th{
 
 }
-
+.new-entry-desig{
+    display: grid;
+    grid-template-columns: 3fr 65px;
+  
+}
+.desig-add-input{
+    width: 100%;
+}
 .newEntryBtn{
     width: 64px;
     height: 56px;
@@ -333,6 +340,8 @@
 
 .table-desig-list-div{
     display: grid;
+    align-items: center;
+    justify-content: center;
     grid-template-columns: 0.3fr 1fr 0.3fr;
     padding: 15px 0px;
     cursor: pointer;
@@ -341,6 +350,9 @@
     font-family: "Roboto", serif;
 }
 .table-desig-list-div > div:first-child{
+    border-right: 1px solid rgba(0, 0, 0, 0.339);
+}
+.table-desig-list-div > div:nth-child(2){
     border-right: 1px solid rgba(0, 0, 0, 0.339);
 }
 .table-desig-list-div:last-child{

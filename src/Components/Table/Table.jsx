@@ -463,12 +463,13 @@ function BackdropError({errorMsg, setErrorMsg}){
     )
 }
 function NewEntryAdd({refreshFactory, lastEntrySaldo}){
-    const [form, setForm] = useState({desig: "", data: null, credito: 0, debito: 0, saldo: lastEntrySaldo===null ?"0":lastEntrySaldo})
+    const [form, setForm] = useState({desig: "", data: null, desigCode: "", credito: 0, debito: 0, saldo: lastEntrySaldo===null ?"0":lastEntrySaldo})
     const {addFactoryEntry, user} = useContext(UserContext)
     const [showDesig, setShowDesig] = useState(false)
     const [errorMsg, setErrorMsg] = useState(null)
     const [errorAlert, setErrorAlert] = useState(false)
     const [loading, setLoading] = useState(false)
+    const [desigWarning, setDesigWarning] = useState(false)
     useEffect(()=>{
         setForm(prev=>{
             return {...prev, saldo: lastEntrySaldo + checkSaldoEntry(form)}
@@ -477,6 +478,12 @@ function NewEntryAdd({refreshFactory, lastEntrySaldo}){
 
     function handleNumInput(e){
         const {name, value} = e.target;
+        if(!String(form.desigCode)){
+            setDesigWarning(true)
+        }
+        else{
+            setDesigWarning(false)
+        }
         setForm(prev=>{
             const formatNum = numeral(value).format('0,0')
             return {...prev, [name]: formatNum}
@@ -509,10 +516,11 @@ function NewEntryAdd({refreshFactory, lastEntrySaldo}){
             setErrorMsg("Credit and debit cannot be both greater than 0")
             return
         }
+
         try{
             setLoading(true)
             await addFactoryEntry(form)
-            setForm({desig: "", data: null, credito: "0", debito: "0"})
+            setForm({desig: "", data: null, credito: "0", debito: "0", desigCode:""})
             refreshFactory()
             setErrorAlert(false)
             setErrorMsg(null)
@@ -526,8 +534,9 @@ function NewEntryAdd({refreshFactory, lastEntrySaldo}){
         setShowDesig(true)
     }
     function handleCodeClick(codeVal, cCode){
+        setDesigWarning(false)
         setForm(prev=>{
-            return {...prev, desig: codeVal, desigCode: cCode}
+            return {...prev, desigCode: cCode}
         })
     }
     return (
@@ -540,15 +549,17 @@ function NewEntryAdd({refreshFactory, lastEntrySaldo}){
 
                         <DatePicker sx={newEntryStyle} format="DD/MM/YYYY" onChange={handleDates}  value={!form.data ? null : form.data}/>
                     </td>
-                    <td>
-                        <FormControl style={newEntryStyle} sx={{position:"relative"}} variant="outlined">
+                    <td className='new-entry-desig'>
+                        <FormControl sx={{position:"relative"}} variant="outlined">
                             {showDesig && <DesigMenu setShowDesig={setShowDesig}  handleCodeClick={handleCodeClick}/>}
                             <InputLabel htmlFor="outlined-desig">Designação</InputLabel>
-                            <OutlinedInput onChange={handleDesig} value={form.desig} id="outlined-desig"
-                                endAdornment={<InputAdornment position="end"><button className='desig-settings-btn' onClick={handleDesigBtn}> <SettingsIcon/></button></InputAdornment>}
+                            <OutlinedInput onChange={handleDesig} value={form.desig} id="outlined-desig" className='desig-add-input'
+                                endAdornment={
+                                    <InputAdornment position="end"><button className='desig-settings-btn' onClick={handleDesigBtn}> <SettingsIcon/></button></InputAdornment>}
                                 label="Designação"
                             />
                         </FormControl>
+                        <TextField disabled label="Code" value={form.desigCode}  />
                     </td>
                     <td>
                         <TextField label="Crédito" style={newEntryStyle} onChange={handleNumInput} name="credito" value={form.credito}/>
@@ -575,6 +586,19 @@ function NewEntryAdd({refreshFactory, lastEntrySaldo}){
                     }
                     >
                         {errorMsg}
+                    </Alert>
+            )}
+                        {desigWarning && (
+                    <Alert
+                    sx={{padding: "0px 20px"}}
+                    className="new-entry-alert"
+                    severity="warning"
+                    action={
+                        <IconButton color="inherit" onClick={() => {setErrorAlert(false); setErrorMsg(null)}}>
+                        </IconButton>
+                    }
+                    >
+                        You have not added a Designação code
                     </Alert>
             )}
 
