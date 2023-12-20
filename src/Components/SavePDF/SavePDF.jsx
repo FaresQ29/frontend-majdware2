@@ -124,7 +124,7 @@ function createTable(tableData){
             const tDebito = document.createElement("td")
             tDebito.innerText = entry.debito
             const tSaldo = document.createElement("td")
-            tSaldo.innerText = entry.saldo
+            tSaldo.innerText =numeral(entry.saldo).format("0,0")
             tr.appendChild(tData)
             tr.appendChild(tDesig)
             tr.appendChild(tCredito)

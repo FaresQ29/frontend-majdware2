@@ -6,7 +6,7 @@ import { Button, Box } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers';
 import {TextField }from '@mui/material';
 import numeral from 'numeral'
-import { dateObjToDisp, formattedStrToNum } from '../../utils';
+import { dateObjToDisp, formattedStrToNum, compareDates } from '../../utils';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import CloseIcon from '@mui/icons-material/Close';
@@ -29,7 +29,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 
 
 export default function Table({setDisplayTable}){
-    const {getCurrentFact, currentFactory} = useContext(UserContext)
+    const {getCurrentFact, currentFactory, user} = useContext(UserContext)
     const [showDateDiv, setShowDateDiv] = useState(false)
     const [factory, setFactory] = useState(null)
     const [lastEntrySaldo, setLastEntrySaldo] = useState(0)
@@ -116,8 +116,9 @@ export default function Table({setDisplayTable}){
             }
         })
         if(filter.codes.length>0){
+
             factCopy.entries = factCopy.entries.map(entry=>{
-                if(!filter.codes.includes(entry.desig)){
+                if(!filter.codes.includes(entry.desigCode)){
                     entry.visible = false
                 }
                 return entry
@@ -212,7 +213,7 @@ function DesigMenuTable({setShowDesigMenu, setFilter, filter}){
     )
 }
 function DesigMenuElement({elem, setFilter, filter}){
-    const isFiltered = filter.codes.includes(elem.codeVal)
+    const isFiltered = filter.codes.includes(elem.code)
 
     const [isChecked, setIsChecked] = useState(isFiltered);
     function handleCheck(){
@@ -220,14 +221,14 @@ function DesigMenuElement({elem, setFilter, filter}){
         if(!isChecked){
             setFilter(prev=>{
                 const copy={...prev}
-                copy.codes = [...copy.codes, elem.codeVal ]
+                copy.codes = [...copy.codes, elem.code ]
                 return copy
             })
         }
         else{
             setFilter(prev=>{
                 const copy={...prev}
-                copy.codes = copy.codes.filter(val=>val!==elem.codeVal)
+                copy.codes = copy.codes.filter(val=>val!==elem.code)
                 return copy
             })
         }
@@ -246,26 +247,70 @@ function DesigMenuElement({elem, setFilter, filter}){
 
 function TableEntry({entry, refreshFactory}){
     const [isEditMode, setIsEditMode]=useState(false)
-    const [editForm, setEditForm] = useState( {desig: entry.desig, data: entry.data, credito: entry.credito, debito: entry.debito})
+    const [editForm, setEditForm] = useState( {desig: entry.desig, data: entry.data, credito: entry.credito, debito: entry.debito, desigCode: entry.desigCode})
     const [delDialog, setDelDialog] = useState(false)
     const {editFactoryEntry, deleteFactoryEntry} = useContext(UserContext)
+    const [showDesig, setShowDesig] = useState(false)
+    const [warningDialog, setWarningDialog] = useState(false)
+    const [errorMsg, setErrorMsg] = useState(null)
     const isVis = entry.visible === false ? "none" : ""
     useEffect(()=>{
-        setEditForm( {desig: entry.desig, data: entry.data, credito: entry.credito, debito: entry.debito})
+        setEditForm( {desig: entry.desig, data: dayjs(entry.data), credito: entry.credito, debito: entry.debito, desigCode:entry.desigCode})
         isEditMode ? window.addEventListener("click", closeEdit) : window.removeEventListener("click", closeEdit)
         function closeEdit(e){
-            if(!e.target.closest(`.row-${entry._id}`) && !e.target.closest(".MuiPickersPopper-root")  && !e.target.closest(".MuiDialog-root")){
-                setIsEditMode(false)
-
+            if(!e.target.closest(`.row-${entry._id}`) && 
+                !e.target.closest(".MuiPickersPopper-root")  && 
+                !e.target.closest(".MuiDialog-root") && 
+                !e.target.closest(".desig-menu") && 
+                !e.target.closest(".desig-bg") &&
+                !e.target.closest(".MuiSvgIcon-root") && 
+                !e.target.closest("#edit-backdrop-warning") && 
+                !e.target.closest("#edit-backdrop-error")
+                ){
+                    if(!compareEditEntry()){
+                        setWarningDialog(true)
+                    }
+                    else{
+                        setIsEditMode(false)
+                    }
             }
         }
         return ()=>{
             window.removeEventListener("click", closeEdit)
         }
     }, [isEditMode])
-
+    function compareEditEntry(){
+        let bool= true;
+        setEditForm(prev=>{
+            const {desig, data, credito, debito, desigCode} = prev
+            if(!compareDates(dayjs(entry.data).$d, dayjs(data).$d)) bool = false
+            if(desig!==entry.desig) bool=false
+            if(credito!==entry.credito) bool=false
+            if(debito!==entry.debito) bool=false
+            return prev
+        })
+        return bool
+        
+    }
+    function handleCodeClick(codeVal, cCode){
+        setEditForm(prev=>{
+            return {...prev, desigCode: cCode, desig: codeVal}
+        })
+    }
     async function handleEdit(){
-        if(!editForm.desig || !editForm.data || !editForm.credito || !editForm.debito) return
+        setWarningDialog(false)
+        if(!editForm.desig){
+            setErrorMsg("Designação cannot be empty")
+            return
+        }
+        if(!editForm.data){
+            setErrorMsg("Date cannot be empty")
+            return
+        }
+        if(formattedStrToNum(editForm.credito) > 0 && formattedStrToNum(editForm.debito) > 0 ){
+            setErrorMsg("Credit and debit cannot be both greater than 0")
+            return
+        }
         try{
             await editFactoryEntry(editForm, entry._id)
             await refreshFactory()
@@ -301,8 +346,12 @@ function TableEntry({entry, refreshFactory}){
     }
     function handleDate(e){
         setEditForm(prev=>{
-            return {...prev, data: e.$d}
+            return {...prev, data: e}
         })
+    }
+    function handleEditWarning(){
+        setWarningDialog(false)
+        setIsEditMode(false)
     }
     return (
         <>
@@ -317,12 +366,21 @@ function TableEntry({entry, refreshFactory}){
             )}
             {isEditMode && (
                 <tr className={`table-entry-edit-row row-${entry._id}`}>
-
                     <td className='table-entry-cell'>
                         <EditIcon className='edit-icon'/>
-                        <DatePicker format="DD/MM/YYYY" onChange={handleDate} defaultValue={null} value={dayjs(editForm.data)} style={{display: isVis}}/>
+                        <DatePicker format="DD/MM/YYYY" onChange={(e)=>handleDate(e)}  value={!editForm.data ? null : editForm.data} style={{display: isVis}}/>
                         </td>
-                    <td className='table-entry-cell'><TextField label="Designação" value={editForm.desig} onChange={handleDesig}/></td>
+                    <td className='table-entry-cell table-entry-cell-desig'>
+                        <TextField label="Code" disabled value={editForm.desigCode}/>
+                        <FormControl style={newEntryStyle} sx={{position:"relative"}} variant="outlined">
+                            {showDesig && <DesigMenu setShowDesig={setShowDesig}  handleCodeClick={handleCodeClick}/>}
+                            <InputLabel htmlFor="outlined-desig">Designação</InputLabel>
+                            <OutlinedInput onChange={handleDesig} value={editForm.desig} id="outlined-desig"
+                                endAdornment={<InputAdornment position="end"><button className='desig-settings-btn' onClick={()=>setShowDesig(true)}> <SettingsIcon/></button></InputAdornment>}
+                                label="Designação"
+                            />
+                        </FormControl>
+                    </td>
                     <td className='table-entry-cell'><TextField label="Crédito" value={editForm.credito} onChange={handleNumInput} name="credito"/></td>
                     <td className='table-entry-cell'><TextField label="Débito" value={editForm.debito} onChange={handleNumInput} name="debito"/></td>
                     <td className='table-entry-cell'>
@@ -332,9 +390,12 @@ function TableEntry({entry, refreshFactory}){
                             <button onClick={()=>{setIsEditMode(false)}}><CloseIcon/></button>
                             <button onClick={()=>{setDelDialog(true)}}><DeleteIcon/></button>
                         </div>
+                        {warningDialog && <BackdropWarning handleEditWarning={handleEditWarning} handleEdit={handleEdit}/>}
+                        {errorMsg && <BackdropError errorMsg={errorMsg} setErrorMsg={setErrorMsg}/>}
                     </td>
                 </tr> 
             )}
+            
             <Dialog open={delDialog} onClose={()=>setDelDialog(false)}>
                 <Box className="delete-entry-dialog">
                 <p>Are you sure you want to delete the following entry?</p>
@@ -366,8 +427,30 @@ function TableEntry({entry, refreshFactory}){
 
     )
 }
+function BackdropWarning({handleEditWarning, handleEdit}){
 
+    return (
+        <div id="edit-backdrop-warning">
+            <div className="edit-backdrop-warning-cont">
+                <p>Save your changes?</p>
+                <div>
+                    <button onClick={handleEdit}>Save</button>
+                    <button onClick={()=>handleEditWarning()}>Cancel</button>
+                </div>
+            </div>
+        </div>
+    )
+}
+function BackdropError({errorMsg, setErrorMsg}){
 
+    return (
+        <div id="edit-backdrop-error" onClick={()=>setErrorMsg(null)}>
+            <div className="edit-backdrop-error-cont">
+                <Alert sx={{userSelect:"none", width:"400px", height:"100px", display:"flex", justifyContent:"center", alignItems:"center"}} severity='error'>{errorMsg}</Alert>
+            </div>
+        </div>
+    )
+}
 function NewEntryAdd({refreshFactory, lastEntrySaldo}){
     const [form, setForm] = useState({desig: "", data: null, credito: 0, debito: 0, saldo: lastEntrySaldo===null ?"0":lastEntrySaldo})
     const {addFactoryEntry, user} = useContext(UserContext)
@@ -391,14 +474,7 @@ function NewEntryAdd({refreshFactory, lastEntrySaldo}){
         setForm(prev=>{return {...prev, data: e}})
     }
     function handleDesig(e){
-        const lastKey = e.target.value.split("").pop()
-        const found = user.codes.find(elem=>elem.code===lastKey)
-        if(found){
-            setForm(prev=>{return {...prev, desig: found.codeVal}})
-        }
-        else{
-            setForm(prev=>{return {...prev, desig: e.target.value}})
-        }
+        setForm(prev=>{return {...prev, desig: e.target.value}})
     }
     async function handleNewEntryAdd(){
         if(!form.data){
@@ -510,6 +586,7 @@ function DesigMenu({setShowDesig, handleCodeClick}){
         }
     }
     function codeClick(cVal, cCode){
+
         handleCodeClick(cVal, cCode)
         setShowDesig(false)
     }

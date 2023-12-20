@@ -9,3 +9,9 @@ export function dateObjToDisp(dateStrObj){
     const yy = dateObj.getFullYear()
     return `${dd<10?"0"+dd:dd}/${mm<10?"0" + mm : mm}/${yy}`
 }
+
+export function compareDates(dateObj1, dateObj2){
+    const d1 = dateObjToDisp(dateObj1)
+    const d2 = dateObjToDisp(dateObj2)
+    return d1===d2 ? true : false
+}

@@ -6,6 +6,8 @@ import { TextField } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { UserContext } from '../../context/user.context';
 import {Alert} from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
+
 
 export default function FactoryMenu(){
     const [anchorEl, setAnchorEl] = useState(null);
@@ -14,7 +16,7 @@ export default function FactoryMenu(){
     const [alert, setAlert] = useState(null)
     const [searchVal, setSearchVal] = useState("")
     const {user, addFactory, factories, getFactories} = useContext(UserContext)
-
+    const [loading, setLoading] = useState(false)
     const open = Boolean(anchorEl);
     function handleSearch(e){
         setSearchVal(e.target.value);
@@ -30,8 +32,6 @@ export default function FactoryMenu(){
         setShowAdd(false)
 }
 
-
-
     function closeMenu(){
         setAnchorEl(null);
         setShowAdd(false);
@@ -40,6 +40,7 @@ export default function FactoryMenu(){
     }
     return (
         <div className='factory-menu-div'>
+            {loading && <div className="circular-progress-table"><CircularProgress size={"80px"}/></div> }
             <Button
                 id="basic-button"
                 aria-controls={open ? 'basic-menu' : undefined}
@@ -53,7 +54,7 @@ export default function FactoryMenu(){
             <Menu id="basic-menu" anchorEl={anchorEl} open={open} onClose={closeMenu}>
                 <div className="menu-style-div">
                     <TextField id="factory-search" label="Search factories" variant="standard" sx={{marginBottom:"10px"}} value={searchVal} onChange={handleSearch}/>
-                    {factories  && <ListFactories searchVal={searchVal} closeMenu={closeMenu}/> }    
+                    {factories  && <ListFactories searchVal={searchVal} closeMenu={closeMenu}  setLoading={setLoading}/>}    
                     <div className="add-cancel-div" style={showAdd ? {background: "#0000000b"} : {background: "none"}}>
                         <Button color='inherit' onClick={()=>{setShowAdd(prev=>!prev); setNewFactVal(""); setAlert(null)}}> {!showAdd ? <AddIcon/> : "CANCEL"} </Button>
                         {showAdd && (
@@ -73,12 +74,21 @@ export default function FactoryMenu(){
     )
 }
 
-function ListFactories({searchVal, closeMenu}){
+function ListFactories({searchVal, closeMenu, setLoading}){
     const {factories, getCurrentFact} = useContext(UserContext)
 
-    function handleFactBtn(factObj){
-        getCurrentFact(factObj._id)
-        closeMenu()
+    async function handleFactBtn(factObj){
+        try{
+            setLoading(true)
+            await getCurrentFact(factObj._id)
+            closeMenu()
+            setLoading(false)
+
+        }
+        catch(err){
+            console.log(err);
+        }
+
     }
     return (
         <div className="list-factories">
