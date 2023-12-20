@@ -147,6 +147,11 @@ export default function Table({setDisplayTable}){
     function clearFilter(e){
         setFilter(prev=>{return {...prev, codes: []}})
     }
+    function calculateLastSaldo(){
+        const first =  new Date(factory.entries[0].data).getTime()
+        const last =  new Date(factory.entries[factory.entries.length-1].data).getTime()
+        return first > last ? factory.entries[0].saldo : factory.entries[factory.entries.length-1].saldo
+    }
     return (
         <div id="table-general-cont">
             <NewEntryAdd  refreshFactory={refreshFactory} lastEntrySaldo={lastEntrySaldo}/>
@@ -178,7 +183,21 @@ export default function Table({setDisplayTable}){
                         <tbody className='main-table-body'>
                                 {factory.entries.map((entry, i)=><TableEntry key={i} entry={entry} refreshFactory={refreshFactory}/>)}
                         </tbody>
-
+                        <tfoot>
+                            <tr>
+                                <td>TOTAL</td>
+                                <td></td>
+                                <td className='filled-tfoot'>
+                                    {numeral(factory.entries.reduce((acc, val)=>acc + formattedStrToNum(val.credito), 0)).format("0,0")}€
+                                </td>
+                                <td className='filled-tfoot'>
+                                    {numeral(factory.entries.reduce((acc, val)=>acc + formattedStrToNum(val.debito), 0)).format("0,0")}€
+                                </td>
+                                <td>
+                                    {numeral(calculateLastSaldo()).format(0,0)}€
+                                </td>
+                            </tr>
+                        </tfoot>
                     </table>
 
                 </div>

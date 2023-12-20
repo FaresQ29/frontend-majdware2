@@ -177,6 +177,7 @@
     font-family: "Inter", serif;
     border: 1px solid rgba(0, 0, 0, 0.15);
     box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;
+    margin-bottom: 20px;
 }
 
 #main-table > table thead{
@@ -380,7 +381,28 @@
 .th-filter-num > button:hover{
     opacity: 1;
 }
+#main-table tfoot{
+    background-color: rgba(0, 0, 0, 0.036);
+}
+#main-table tfoot tr{
+border-top: 2px solid rgba(0, 0, 0, 0.3);
+}
+#main-table tfoot tr td{
+    padding: 20px 0px;
+    text-align: center;
+    font-size: 1.2rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 
+}
+.filled-tfoot:nth-child(3){
+    border-left: 1px solid rgba(0, 0, 0, 0.3);
+
+
+}
+.filled-tfoot{
+    border-right: 1px solid rgba(0, 0, 0, 0.3);
+
+}
 /*  */
 .delete-entry-dialog{
     padding: 20px;
