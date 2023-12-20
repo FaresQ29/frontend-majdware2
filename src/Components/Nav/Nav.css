@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Afacad:wght@500&display=swap');
 nav{
     position: sticky;
     top: 0;
@@ -8,7 +9,7 @@ nav{
     display: grid;
     align-items: center;
     display: grid;
-    padding: 0 5%;
+    padding: 0 3%;
     grid-template-columns: 1fr 70px;
     z-index: 200;
 }
@@ -30,4 +31,9 @@ nav > h3{
     font-size: 1.3rem;
     user-select: none;
 
+}
+#nav-main-logo{
+    font-family: 'Afacad', sans-serif;
+
+    font-size: 1.8rem;
 }

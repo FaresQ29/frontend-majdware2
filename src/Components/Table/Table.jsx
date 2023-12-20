@@ -23,7 +23,10 @@ import FilterDate from "../FilterDate/FilterDate.jsx"
 import DateRangeIcon from '@mui/icons-material/DateRange';
 import MakeDraggable from '../MakeDraggable.jsx';
 import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
+import Alert from '@mui/material/Alert';
+import IconButton from '@mui/material/IconButton';
+import CircularProgress from '@mui/material/CircularProgress';
+
 
 export default function Table({setDisplayTable}){
     const {getCurrentFact, currentFactory} = useContext(UserContext)
@@ -31,6 +34,7 @@ export default function Table({setDisplayTable}){
     const [factory, setFactory] = useState(null)
     const [lastEntrySaldo, setLastEntrySaldo] = useState(0)
     const [showDesigMenu, setShowDesigMenu] = useState(false)
+    const [loading, setLoading] = useState(true)
     const [filter, setFilter] = useState({
         date: "asc",
         codes: [],
@@ -55,9 +59,10 @@ export default function Table({setDisplayTable}){
     }, [filter])
 
     async function refreshFactory(){
+        setLoading(true)
         const response = await getCurrentFact(currentFactory._id)
         setFactory(filterSettings(response))
-
+        setLoading(false)
     }
     function changeFilterDates(from, to){
         setFilter(prev=>{
@@ -82,9 +87,10 @@ export default function Table({setDisplayTable}){
         copyEntries.map((entry, index)=>{
             if(index===0){ entry.saldo = checkSaldoEntry(entry) }
             else { entry.saldo = copyEntries[index-1].saldo + checkSaldoEntry(entry)}
-            if(index===copyEntries.length-1) setLastEntrySaldo(entry.saldo)
+            if(index===copyEntries.length-1){ 
+                setLastEntrySaldo(entry.saldo)
+            }
         })
-
         fact.entries = copyEntries
     }
     function filterSettings(fact){
@@ -108,7 +114,6 @@ export default function Table({setDisplayTable}){
                 if(filter.date==="asc"){ return a.timestamp > b.timestamp ? 1 : -1 }
                 else if(filter.date==="des"){return a.timestamp < b.timestamp ? 1 : -1 }
             }
-      
         })
         if(filter.codes.length>0){
             factCopy.entries = factCopy.entries.map(entry=>{
@@ -144,7 +149,7 @@ export default function Table({setDisplayTable}){
     return (
         <div id="table-general-cont">
             <NewEntryAdd  refreshFactory={refreshFactory} lastEntrySaldo={lastEntrySaldo}/>
-                
+            {loading && (<div className="circular-progress-table"> <CircularProgress size={"80px"}/></div>)}
             {(factory) && (
                 <div id="main-table">
                     <table>
@@ -174,6 +179,7 @@ export default function Table({setDisplayTable}){
                         </tbody>
 
                     </table>
+
                 </div>
             )}
         </div>
@@ -363,15 +369,17 @@ function TableEntry({entry, refreshFactory}){
 
 
 function NewEntryAdd({refreshFactory, lastEntrySaldo}){
-
-    const [form, setForm] = useState({desig: "", data: null, credito: 0, debito: 0, saldo: lastEntrySaldo===null ?"":lastEntrySaldo})
+    const [form, setForm] = useState({desig: "", data: null, credito: 0, debito: 0, saldo: lastEntrySaldo===null ?"0":lastEntrySaldo})
     const {addFactoryEntry, user} = useContext(UserContext)
     const [showDesig, setShowDesig] = useState(false)
+    const [errorMsg, setErrorMsg] = useState(null)
+    const [errorAlert, setErrorAlert] = useState(false)
     useEffect(()=>{
         setForm(prev=>{
             return {...prev, saldo: lastEntrySaldo + checkSaldoEntry(form)}
         })
     }, [lastEntrySaldo, form.credito, form.debito])
+
     function handleNumInput(e){
         const {name, value} = e.target;
         setForm(prev=>{
@@ -392,13 +400,29 @@ function NewEntryAdd({refreshFactory, lastEntrySaldo}){
             setForm(prev=>{return {...prev, desig: e.target.value}})
         }
     }
-    async function handleNewEntryAdd(e){
-        if(!form.data || !form.desig){return}
+    async function handleNewEntryAdd(){
+        if(!form.data){
+            setErrorAlert(true)
+            setErrorMsg("Date cannot be empty")
+            return
+        }
+        if(!form.desig){
+            setErrorAlert(true)
+            setErrorMsg("Designação cannot be empty")
+            return
+        }
+        if(formattedStrToNum(form.credito) > 0 && formattedStrToNum(form.debito) > 0 ){
+            setErrorAlert(true)
+            setErrorMsg("Credit and debit cannot be both greater than 0")
+            return
+        }
         try{
             
             await addFactoryEntry(form)
             setForm({desig: "", data: null, credito: "0", debito: "0"})
             refreshFactory()
+            setErrorAlert(false)
+            setErrorMsg(null)
             
         }
         catch(err){console.log(err)}
@@ -407,9 +431,9 @@ function NewEntryAdd({refreshFactory, lastEntrySaldo}){
     function handleDesigBtn(){
         setShowDesig(true)
     }
-    function handleCodeClick(codeVal){
+    function handleCodeClick(codeVal, cCode){
         setForm(prev=>{
-            return {...prev, desig: codeVal}
+            return {...prev, desig: codeVal, desigCode: cCode}
         })
     }
     return (
@@ -443,6 +467,22 @@ function NewEntryAdd({refreshFactory, lastEntrySaldo}){
                 </tbody>
             </table>        
             <Button className='newEntryBtn' onClick={(handleNewEntryAdd)}><AddIcon/></Button>
+            {errorMsg && (
+                    <Alert
+                    sx={{padding: "0px 20px"}}
+                    className="new-entry-alert"
+                    severity="error"
+                    action={
+                        <IconButton color="inherit" onClick={() => {setErrorAlert(false); setErrorMsg(null)}}>
+                            <CloseIcon fontSize="inherit" />
+                        </IconButton>
+                    }
+                    >
+                        {errorMsg}
+                    </Alert>
+            )}
+
+      
         </div>
 
     )
@@ -469,8 +509,8 @@ function DesigMenu({setShowDesig, handleCodeClick}){
             console.log(err);
         }
     }
-    function codeClick(cVal){
-        handleCodeClick(cVal)
+    function codeClick(cVal, cCode){
+        handleCodeClick(cVal, cCode)
         setShowDesig(false)
     }
     return (
@@ -482,7 +522,7 @@ function DesigMenu({setShowDesig, handleCodeClick}){
                 </button>
                 {showAdd && (
                     <div className="desig-menu-add-code">
-                        <TextField label="Code" onChange={(e)=>setCode(e.target.value)}  value={code} sx={{background:"white"}}/>
+                        <TextField label="Code" type='number' onChange={(e)=>setCode(e.target.value)} value={code} sx={{background:"white"}}/>
                         <TextField label="Value" onChange={(e)=>setCodeVal(e.target.value)}  value={codeVal} sx={{background:"white"}}/>
                         <button className='desig-menu-add-code-btn' onClick={handleSaveCode}>Save</button>
                     </div>
@@ -493,8 +533,8 @@ function DesigMenu({setShowDesig, handleCodeClick}){
                         {user.codes.map((elem, i)=>{
                             return (
                                 <div className="code-div" key={i}>
-                                    <div className='code-div-code' onClick={()=>codeClick(elem.codeVal)}>{elem.code}</div>
-                                    <div className='code-div-codeVal' onClick={()=>codeClick(elem.codeVal)}>{elem.codeVal}</div>
+                                    <div className='code-div-code' onClick={()=>codeClick(elem.codeVal, elem.code)}>{elem.code}</div>
+                                    <div className='code-div-codeVal' onClick={()=>codeClick(elem.codeVal, elem.code)}>{elem.codeVal}</div>
                                     <button onClick={()=>deleteCode(elem._id)}><DeleteIcon/></button>
                                 </div>
                             )

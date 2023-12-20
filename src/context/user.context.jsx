@@ -24,12 +24,16 @@ export function UserProviderWrapper({children}){
     function storeToken(token){localStorage.setItem("authToken", token)}
 
     async function addCode(codeObj){
+        const storedToken = localStorage.getItem("authToken");
+
         try{
             const checkIfExists = user.codes.find(elem=>elem.code===codeObj.code)
             if(checkIfExists) throw Error("Code already exists")
             const userCopy = {...user}
             userCopy.codes.push(codeObj)
-            const response = await axios.put(backendUrl+"/user/add/"+user._id, userCopy)
+            const response = await axios.put(backendUrl+"/user/add/"+user._id, userCopy,
+            { headers: { Authorization: `Bearer ${storedToken}`}}
+            )
             await authenticateUser()
         }
         catch(err){
@@ -37,10 +41,13 @@ export function UserProviderWrapper({children}){
         }
     }
     async function deleteCode(codeId){
+        const storedToken = localStorage.getItem("authToken");
         try{
             const userCopy = {...user}
             userCopy.codes = userCopy.codes.filter(code=>code._id!==codeId)
-            const response = await axios.put(backendUrl+"/user/add/"+user._id, userCopy)
+            const response = await axios.put(backendUrl+"/user/add/"+user._id, userCopy,
+            { headers: { Authorization: `Bearer ${storedToken}`}}
+            )
             await authenticateUser()
         }
         catch(err){
@@ -74,11 +81,14 @@ export function UserProviderWrapper({children}){
         }
     }
     async function addFactoryEntry(entryForm){
+        const storedToken = localStorage.getItem("authToken");
         const factCopy = {...currentFactory}
         entryForm.timestamp = Date.now()
         factCopy.entries.push(entryForm)
         try{
-            const response = await axios.put(backendUrl+"/factory/"+currentFactory._id, factCopy)
+            const response = await axios.put(backendUrl+"/factory/"+currentFactory._id, factCopy,
+            { headers: { Authorization: `Bearer ${storedToken}`}}
+            )
             setCurrentFactory(response.data)
         }
         catch(err){
@@ -86,12 +96,15 @@ export function UserProviderWrapper({children}){
         }
     }
     async function editFactoryEntry(entryForm, entryId){
+        const storedToken = localStorage.getItem("authToken");
         const factCopy = {...currentFactory}
         factCopy.entries = factCopy.entries.map(entry=>{
             return entry._id===entryId ? entryForm : entry;
         })
         try{
-            const response = await axios.put(backendUrl+"/factory/"+currentFactory._id, factCopy)
+            const response = await axios.put(backendUrl+"/factory/"+currentFactory._id, factCopy,
+            { headers: { Authorization: `Bearer ${storedToken}`}}
+            )
             setCurrentFactory(response.data)
         }
         catch(err){
@@ -100,11 +113,14 @@ export function UserProviderWrapper({children}){
     }
 
     async function deleteFactoryEntry(entryId){
+        const storedToken = localStorage.getItem("authToken");
         const factCopy = {...currentFactory}
         factCopy.entries = factCopy.entries.filter(entry=>entry._id!==entryId)
         
         try{
-            const response = await axios.put(backendUrl+"/factory/"+currentFactory._id, factCopy)
+            const response = await axios.put(backendUrl+"/factory/"+currentFactory._id, factCopy, 
+            { headers: { Authorization: `Bearer ${storedToken}`}}
+            )
             setCurrentFactory(response.data)
         }
         catch(err){
@@ -112,8 +128,12 @@ export function UserProviderWrapper({children}){
         }
     }
     async function addFactory(factObj){
+        const storedToken = localStorage.getItem("authToken");
+
         try{
-            await axios.post(backendUrl+"/factory/all", factObj)
+            await axios.post(backendUrl+"/factory/all", factObj,
+            { headers: { Authorization: `Bearer ${storedToken}`}}
+            )
             await getFactories(factObj.factoryUser)
 
         }

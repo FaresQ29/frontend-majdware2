@@ -174,12 +174,12 @@ function calculateTotals(entries){
 function todayDate(){
     const date = new Date()
     const d = date.getDate() < 10 ? "0" + date.getDate() : date.getDate()
-    const m = date.getMonth() < 10 ? "0" + date.getMonth() : date.getMonth()
+    const m = (date.getMonth()+1) < 10 ? "0" + (date.getMonth()+1) : date.getMonth()+1
     return `${d}-${m}-${date.getFullYear()}`
 }
 function formatDate(date){
     const d = date.getDate() < 10 ? "0"+date.getDate() : date.getDate()
-    const m = date.getMonth() < 10 ? "0"+date.getMonth() : date.getMonth()
+    const m = (date.getMonth()+1) < 10 ? "0" + (date.getMonth()+1) : date.getMonth()+1
     return `${d}/${m}/${date.getFullYear()}`
 }
 

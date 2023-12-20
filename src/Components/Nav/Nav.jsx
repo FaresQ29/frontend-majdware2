@@ -12,7 +12,7 @@ export default function Nav(){
     }
     return (
         <nav>
-            <h3 style={{fontFamily:"Roboto"}}>MAJDWARE</h3>
+            <h3 id="nav-main-logo">MAJDWARE</h3>
             <button id="logout-btn" onClick={logout}>Logout</button>
         </nav>
     )
