@@ -25,7 +25,6 @@
     position: sticky;
     top: 132px;
     background-color: #eceff1;
-
     z-index: 100;
 }
 
@@ -35,6 +34,25 @@
     margin-bottom: 1%;
     grid-row: 1 / 2;
     grid-column: 1 / 2;
+    top: 800px;
+}
+
+@media screen and (max-width: 940px) {
+    .new-entry-div{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        top: 0;
+    }
+    .new-entry-table tbody tr{
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    .new-entry-div > button{
+        width: 100%;
+    }
 }
 .new-entry-div > button{
     grid-row: 1 / 2;
