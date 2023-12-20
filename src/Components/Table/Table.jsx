@@ -253,6 +253,7 @@ function TableEntry({entry, refreshFactory}){
     const [showDesig, setShowDesig] = useState(false)
     const [warningDialog, setWarningDialog] = useState(false)
     const [errorMsg, setErrorMsg] = useState(null)
+    const [loading, setLoading] = useState(false)
     const isVis = entry.visible === false ? "none" : ""
     useEffect(()=>{
         setEditForm( {desig: entry.desig, data: dayjs(entry.data), credito: entry.credito, debito: entry.debito, desigCode:entry.desigCode})
@@ -267,12 +268,8 @@ function TableEntry({entry, refreshFactory}){
                 !e.target.closest("#edit-backdrop-warning") && 
                 !e.target.closest("#edit-backdrop-error")
                 ){
-                    if(!compareEditEntry()){
-                        setWarningDialog(true)
-                    }
-                    else{
-                        setIsEditMode(false)
-                    }
+                    if(!compareEditEntry()){setWarningDialog(true)}
+                    else{ setIsEditMode(false) }
             }
         }
         return ()=>{
@@ -298,6 +295,7 @@ function TableEntry({entry, refreshFactory}){
         })
     }
     async function handleEdit(){
+        setLoading(true)
         setWarningDialog(false)
         if(!editForm.desig){
             setErrorMsg("Designação cannot be empty")
@@ -305,6 +303,10 @@ function TableEntry({entry, refreshFactory}){
         }
         if(!editForm.data){
             setErrorMsg("Date cannot be empty")
+            return
+        }
+        if(String(editForm.data.$d)==="Invalid Date"){
+            setErrorMsg("Check date")
             return
         }
         if(formattedStrToNum(editForm.credito) > 0 && formattedStrToNum(editForm.debito) > 0 ){
@@ -315,21 +317,26 @@ function TableEntry({entry, refreshFactory}){
             await editFactoryEntry(editForm, entry._id)
             await refreshFactory()
             setIsEditMode(false)
+            setLoading(false)
 
         }
         catch(err){
             console.log("err");
+            setLoading(false)
         }
     }
     async function deleteEntry(){
+        setLoading(true)
         try{
             await deleteFactoryEntry(entry._id)
             await refreshFactory()
             setIsEditMode(false)
             setDelDialog(false)
+            setLoading(false)
         }
         catch(err){
             console.log("err");
+            setLoading(false)
         }
     }
     function handleDesig(e){
@@ -357,7 +364,11 @@ function TableEntry({entry, refreshFactory}){
         <>
             {!isEditMode && (
                 <tr className={`table-entry-row row-${entry._id}`} onDoubleClick={()=>setIsEditMode(true)} style={{display: isVis}}>
-                    <td className='table-entry-cell'>{dateObjToDisp(entry.data)}</td>
+                    <td className='table-entry-cell'>
+                        {dateObjToDisp(entry.data)}
+                 {loading && (<div className="circular-progress-table"> <CircularProgress size={"80px"}/></div>)}
+                    
+                    </td>
                     <td className='table-entry-cell'>{entry.desig}</td>
                     <td className='table-entry-cell'>{entry.credito}</td>
                     <td className='table-entry-cell'>{entry.debito}</td>
@@ -457,6 +468,7 @@ function NewEntryAdd({refreshFactory, lastEntrySaldo}){
     const [showDesig, setShowDesig] = useState(false)
     const [errorMsg, setErrorMsg] = useState(null)
     const [errorAlert, setErrorAlert] = useState(false)
+    const [loading, setLoading] = useState(false)
     useEffect(()=>{
         setForm(prev=>{
             return {...prev, saldo: lastEntrySaldo + checkSaldoEntry(form)}
@@ -482,6 +494,11 @@ function NewEntryAdd({refreshFactory, lastEntrySaldo}){
             setErrorMsg("Date cannot be empty")
             return
         }
+        if(String(form.data.$d)==="Invalid Date"){
+            setErrorAlert(true)
+            setErrorMsg("Check date")
+            return
+        }
         if(!form.desig){
             setErrorAlert(true)
             setErrorMsg("Designação cannot be empty")
@@ -493,15 +510,16 @@ function NewEntryAdd({refreshFactory, lastEntrySaldo}){
             return
         }
         try{
-            
+            setLoading(true)
             await addFactoryEntry(form)
             setForm({desig: "", data: null, credito: "0", debito: "0"})
             refreshFactory()
             setErrorAlert(false)
             setErrorMsg(null)
+            setLoading(false)
             
         }
-        catch(err){console.log(err)}
+        catch(err){setLoading(false)}
     }
 
     function handleDesigBtn(){
@@ -518,6 +536,8 @@ function NewEntryAdd({refreshFactory, lastEntrySaldo}){
                 <tbody>
                 <tr>
                     <td>
+                {loading && (<div className="circular-progress-table"> <CircularProgress size={"80px"}/></div>)}
+
                         <DatePicker sx={newEntryStyle} format="DD/MM/YYYY" onChange={handleDates}  value={!form.data ? null : form.data}/>
                     </td>
                     <td>

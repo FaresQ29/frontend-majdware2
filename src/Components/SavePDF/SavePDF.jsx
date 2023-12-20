@@ -28,7 +28,7 @@ export default function DialogComp({dialog, setDialog, displayTable}){
                 <TextField label="Factory Name" name="factoryName" value={form.factoryName} onChange={handleChange} />
                 <TextField label="Filename" name="fileName" value={form.fileName} onChange={handleChange}/>
                 <div className="btn-div-export">
-                    <button onClick={()=>generatePDF(displayTable, form)}><img src={logoPdf} alt="" />Export PDF</button>
+                    <button onClick={()=>generatePDF(displayTable, form, setDialog)}><img src={logoPdf} alt="" />Export PDF</button>
 
                 </div>
             </Box>
@@ -38,17 +38,18 @@ export default function DialogComp({dialog, setDialog, displayTable}){
 }
 
 
-function generatePDF(displayTable, form){
+function generatePDF(displayTable, form, setDialog){
 
     const table = createTable(displayTable)
     const tableInfo = createInfo(displayTable, form)
     const doc = new jsPDF()
     document.body.appendChild(table);
     document.body.appendChild(tableInfo);
+    doc.page=1; 
 
     autoTable(doc, { 
         html : '#export-info-table',
-        theme: "plain",
+        theme: "grid",
         margin: { top: 10 },
         styles: {
             halign:"center"
@@ -68,6 +69,7 @@ function generatePDF(displayTable, form){
     doc.save(`${form.fileName}.pdf`);
     table.remove()
     tableInfo.remove()
+    setDialog(false)
 }
 function createInfo(tableData, form){
     const table = document.createElement("table");
