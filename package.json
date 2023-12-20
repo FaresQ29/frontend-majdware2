@@ -3,11 +3,14 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "homepage": "https://www.majdware.com",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "predeploy": "npm run build",  
+    "deploy": "gh-pages -d build"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",
@@ -19,6 +22,7 @@
     "@mui/x-date-pickers": "^6.18.4",
     "axios": "^1.6.2",
     "dayjs": "^1.11.10",
+    "gh-pages": "^6.1.0",
     "jspdf": "^2.5.1",
     "jspdf-autotable": "^3.8.1",
     "numeral": "^2.0.6",
