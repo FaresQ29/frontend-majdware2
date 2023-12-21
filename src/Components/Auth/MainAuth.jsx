@@ -34,7 +34,6 @@ export default function MainAuth(){
     }, [])
 
     function handleEnter(e){
-        console.log("fart");
         if(e.key==="Enter"){
             if(tabRef.current==="login"){
                 handleLogin(e)
