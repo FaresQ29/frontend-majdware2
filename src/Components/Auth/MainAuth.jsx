@@ -1,9 +1,9 @@
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import './authStyle.css'
 import TextField from '@mui/material/TextField';
-import { FormControl, IconButton, InputAdornment, InputLabel, OutlinedInput, Alert } from "@mui/material";
+import { FormControl, IconButton, InputAdornment, InputLabel, OutlinedInput, Alert, easing } from "@mui/material";
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import Button from '@mui/material/Button';
@@ -23,12 +23,33 @@ export default function MainAuth(){
     const [loading, setLoading] = useState(false)
     const navigate = useNavigate()
     const [errMsg ,setErrMsg] = useState(null)
+    const nameRef = useRef(nameField)
+    const passRef = useRef(passField)
+    const tabRef = useRef(tabValue)
+
+
+    useEffect(()=>{
+        window.addEventListener("keypress", handleEnter)
+        return ()=> window.removeEventListener("keypress", handleEnter)
+    }, [])
+
+    function handleEnter(e){
+        console.log("fart");
+        if(e.key==="Enter"){
+            if(tabRef.current==="login"){
+                handleLogin(e)
+            }
+            else if(tabRef.current==="register"){
+                handleRegister(e)
+            }
+        }
+    }
 
     async function handleRegister(e){
         e.preventDefault()
         try{
             setLoading(true)
-            const formData = {name: nameField, password: passField}
+            const formData = {name: nameRef.current, password: passRef.current}
             const response = await axios.post(backendUrl + "/auth/register", formData)
             storeToken(response.data.authToken);
             authenticateUser()
@@ -48,7 +69,7 @@ export default function MainAuth(){
         try{
 
             setLoading(true)
-            const formData = {name: nameField, password: passField}
+            const formData = {name: nameRef.current, password: passRef.current}
             const response = await axios.post(backendUrl + "/auth/login", formData)
             storeToken(response.data.authToken);
             authenticateUser()
@@ -65,9 +86,22 @@ export default function MainAuth(){
 
     function handleChange(e, newValue){
         setTabValue(newValue);
+        tabRef.current = newValue
         setNameField("")
         setPassField("")
     }
+    function handleUser(e){
+       setNameField(()=>{
+            nameRef.current = e.target.value
+            return e.target.value
+       })
+    }
+    function handlePass(e){
+        setPassField(()=>{
+             passRef.current = e.target.value
+             return e.target.value
+        })
+     }
     return (
         <>
             {loading && <BackdropCreate/>}
@@ -78,12 +112,10 @@ export default function MainAuth(){
                         <Tab value="register" label="Register" />
                     </Tabs>
                     <form id="auth-input-cont">
-                        <TextField required id="outlined-required" label="Username" value={nameField} onChange={(e)=>setNameField(e.target.value)}/>
+                        <TextField required id="outlined-required" label="Username" value={nameField} onChange={(e)=>handleUser(e)}/>
                         <FormControl variant="outlined">
                             <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
-                            <OutlinedInput id="outlined-adornment-password" type={showPassword ? 'text' : 'password'}
-                            value={passField}
-                            onChange={(e)=>setPassField(e.target.value)}
+                            <OutlinedInput id="outlined-adornment-password" type={showPassword ? 'text' : 'password'} value={passField} onChange={(e)=>handlePass(e)}
                             endAdornment={
                                 <InputAdornment position="end">
                                     <IconButton onClick={()=>{setShowPassword(prev=>!prev)}} onMouseDown={(e)=>e.preventDefault()} edge="end" >

@@ -122,9 +122,9 @@ function createTable(tableData){
             const tDesig = document.createElement("td")
             tDesig.innerText = entry.desig
             const tCredito = document.createElement("td")
-            tCredito.innerText = entry.credito
+            tCredito.innerText = entry.credito!=="0" ? entry.credito : "";
             const tDebito = document.createElement("td")
-            tDebito.innerText = entry.debito
+            tDebito.innerText = entry.debito!=="0" ? entry.debito : "";
             const tSaldo = document.createElement("td")
             tSaldo.innerText =numeral(entry.saldo).format("0,0")
             tr.appendChild(tData)
@@ -163,10 +163,10 @@ function calculateTotals(entries){
     let totalCredit = 0
     let totalDebit = 0
     let totalSaldo = 0
+    totalSaldo=entries[entries.length-1].saldo
     entries.forEach(entry=>{
         totalCredit+= formattedStrToNum(entry.credito)
         totalDebit+= formattedStrToNum(entry.debito)
-        totalSaldo+= formattedStrToNum(entry.saldo)
     })
     return {totalCredit: numeral(totalCredit).format("0,0"), totalDebit: numeral(totalDebit).format("0,0"), totalSaldo: numeral(totalSaldo).format("0,0")};
 }
